@@ -1,0 +1,168 @@
+---
+title: "Loops and Functions"
+format: html
+editor: visual
+---
+
+## Day 4 Activities
+
+```{r}
+library(tidyverse)
+library(here)
+library(janitor)
+```
+
+## Part 1. For loops revisited
+
+### Task 1
+
+```{r}
+weekdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+
+transects <- c("Transect A", "Transect B", "Transect C")
+```
+
+```{r}
+
+transect_matrix <- matrix(nrow = length(weekdays), ncol = length(transects))
+
+for (i in seq_along(transects)) {
+  for (j in seq_along(weekdays)) {
+    day_spot <- paste(weekdays[j], "-", transects[i])
+    transect_matrix[j, i] <- day_spot
+  }
+}
+```
+
+## Part 2. Functions introduced
+
+### Task 2
+
+```{r}
+force <- function(mass_kg, acceleration) {
+  newtons = (mass_kg * acceleration)
+  print(paste("The resulting force is", newtons, "Newtons."))
+}
+```
+
+```{r}
+force(20, 50)
+```
+
+### Task 3
+
+The length:weight relationship for fish is: W=aL\^b, where where L is total fish length (centimeters), W is the expected fish weight (grams), and a and b are species-dependent parameter values (shown below for several fish from Peyton et al. 2016).
+
+```{r}
+fish_parms <- data.frame(sci_name = c("Chanos chanos", "Sphyraena barracuda", "Caranx ignobilis"), common_name = c("Milkfish", "Great barracuda", "Giant trevally"), a_est = c(0.0905, 0.0181, 0.0353), b_est = c(2.52, 3.27, 3.05))
+```
+
+```{r}
+fish_weight_bad <- function(fish_name, tot_length) {
+  if (fish_name == "Milkfish") {
+    weight = fish_parms$a_est[1] * tot_length ^ fish_parms$b_est[1]
+    print(weight)
+  }
+  else if (fish_name == "Great barracuda") {
+    weight = fish_parms$a_est[2] * tot_length ^ fish_parms$b_est[2]
+    print(weight)
+  }
+  else if (fish_name == "Giant trevally") {
+     weight = fish_parms$a_est[3] * tot_length ^ fish_parms$b_est[3]
+     print(weight)
+  }
+}
+```
+
+```{r}
+fish_weight <- function(fish_name, tot_length) {
+  my_fish <- filter(fish_parms, common_name == fish_name)
+  weight = my_fish$a_est * tot_length ^ my_fish$b_est
+  print(weight)
+}
+```
+
+```{r}
+fish_weight("Giant trevally", 110)
+```
+
+```{r}
+lengths <- seq(0, 100, 1)
+
+milkfish_weights <- fish_weight("Milkfish", tot_length = lengths)
+```
+
+### Task 4
+
+Wave power (more accurately wave energy flux) in deep water is approximated by:
+
+P(deep) = 0.5 \* (H \^ 2 ) \* T
+
+P: power (kW/m)
+
+H: height (m)
+
+T: wave period (s)
+
+```{r}
+wave_power <- function(wave_height, period) {
+  power <- 0.5 * (wave_height ^ 2) * period
+  return(power)
+}
+```
+
+```{r}
+wave_power(3, 8)
+```
+
+```{r}
+height_range <- seq(0, 3, 0.2)
+
+wave_power(wave_height = height_range, period = 8)
+```
+
+### Task 5
+
+The wave energy equation changes based on ocean depth. Along the coast of Brenville, which has a very sharp shelf as the wave approaches the coast, wave energy is approximated using the deep ocean equation (the one you used above) for
+
+depths \> 12 meters, and a
+
+shallow equation for
+
+depths \<= 12 meters.
+
+The Brenville team estimates shallow wave power by:
+
+P(shallow) = 0.81 \* (H \^ 2) \* T
+
+Create a function that requires inputs of water depth, wave height and period, then returns the approximated wave power using the correct equation for the depth entered. It should also include a message (hint: use `message()` just like you would use warning!) that lets the user know if the shallow or deep water equation was used.
+
+```{r}
+true_wave_power <- function(depth, wave_height, wave_period) {
+   if ((depth %in% c("shallow", "Shallow")) | depth <= 12) {
+      message("Shallow water equation was used!")
+   }
+     
+     
+  if ((depth %in% c("shallow", "Shallow")) | depth <= 12) {
+    shallow_power <- 0.81 * (wave_height ^ 2) * wave_period
+    print(shallow_power)
+  }
+  
+  else if ((depth %in% c("deep", "Deep")) | depth > 12) {
+    message("Deep water equation was used!")
+    deep_power <- 0.5 * (wave_height ^ 2) * wave_period
+    return(deep_power)
+     
+  }
+    
+}
+```
+
+```{r}
+true_wave_power(11, 6, 2)
+```
+
+```{r}
+true_wave_power(14, 9, 8)
+```
